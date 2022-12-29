@@ -23,19 +23,21 @@ contract FileRegistry is ERC721Full {
 
 
 /*
+! File Owner = Seller !
+
 Register art/file
 
-    tokenid = contract.functions.registerFile(owner_address, name_of_file, name_of_owner, tokenURI).transact({"from": owner_address, "gas": 100000})
+    tokenid = contract.functions.registerFile(owner_address, name_of_file, name_of_owner, tokenURI).transact({"from": seller_address, "gas": 100000})
 
 Transfer owner
 
-    contract.functions.transferFrom(owner_address, purchaser_address, tokenid).transact({"from": owner_address, "gas": 100000})
+    contract.functions.transferFrom(owner_address, purchaser_address, tokenid).transact({"from": seller_address, "gas": 100000})
 
 Display owner of the specific tokenid
 
-    contract.functions.ownerOf(tokenid).transact({"from": owner_address, "gas": 100000})
+    contract.functions.ownerOf(tokenid).call()
 
 Display token URI
 
-    contract.functions.tokenURI(tokenid).transact({"from": owner_address, "gas": 100000})
+    contract.functions.tokenURI(tokenid).call()
 */
