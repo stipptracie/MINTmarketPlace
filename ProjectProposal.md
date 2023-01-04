@@ -6,10 +6,10 @@
 
 ## Research Questions to Answer: 
 
-What new technology should we include:
-Upload feature interact - IPFS
-Implement reward for minting
-Make auction for NFT if time allows, then give winner ICO
+What new technology should we include?
+Can we get our smart contracts to use IPFS?
+Can we implement reward for minting?
+Can we create an auction for NFT creation then give winner ICO?
 
 
 Rough Breakdown of Tasks: 
