@@ -44,7 +44,7 @@ seller_address = st.text_input("Put seller's wallet address")
 # Accept a file
 name_of_file = st.text_input("Enter the name of the file")
 name_of_owner = st.text_input("Enter the name of the owner")
-file = st.file_uploader("Upload Artwork", type=["jpg", "jpeg", "png"])
+file = 'st.file_uploader("Upload Artwork", type=["jpg", "jpeg", "png"])'
 
 #######################
 ## Save file to IPFS ##
@@ -52,39 +52,47 @@ tokenURI = "Unique IPFS Addres (URL/URI) will be set"
 #######################
 
 # Assign NFT to a file
-tokenid = file_contract.functions.registerFile(seller_address, name_of_file, name_of_owner, tokenURI).transact({"from": seller_address, "gas": 100000})
+tokenid = file_contract.functions.registerFile(seller_address, name_of_file, name_of_owner, tokenURI).transact({"from": seller_address, "gas": 6721970})
 
 
 
 
 
 ########## Auction ##########
+st.write(auction_contract.functions.store().transact({"from": seller_address, "gas": 6721970}))
+
 ### Start ###
 # Set Starting Price
-starting_price = st.text_input("Starting Price")
+starting_price = int(st.number_input("Starting Price"))
 # Start Auction
 if st.button("Start Auction"):
-    auction_contract.functions.start(starting_price).transact({"from": store_address, "gas": 100000})
+    auction_contract.functions.start(starting_price).transact({"from": seller_address, "gas": 6721970})
 
 ### Bid ###
 # Set Auction Bidder address
 bidder_address = st.text_input("Put purchaser wallet address")
 # Set Bidding Amount
-amount = st.text_input("Bid Amount")
+amount = int(st.number_input("Bid Amount"))
 # Bid
 if st.button("Bid"):
     auction_contract.functions.bid(amount).transact({"from": bidder_address, "gas": 100000})
 
+if st.button("What time is this auction end at?"):
+    st.write(auction_contract.functions.endAt().transact({"from": seller_address, "gas": 100000}))
+
 ### End ###
 if st.button("end"):
-    auction_contract.fuctions.end().transact({"from": store_address, "gas": 100000})
+    auction_contract.functions.end().transact({"from": seller_address, "gas": 100000})
 
 
     ########## NFT and Coin Transfer ##########
+    
+    # # Set offer amount
+    offer_amount = auction_contract.functions.highestBid().transact({"from": seller_address, "gas": 100000})
+    st.write(offer_amount)
     # Set purchaser equal to the highest bidder
-    purchaser_address = auction_contract.functions.highestBidder().call()
-    # Set offer amount
-    offer_amount = auction_contract.functions.highestBid().call()
+    purchaser_address = auction_contract.functions.highestBidder().transact({"from": seller_address, "gas": 100000})
+    st.write(purchaser_address)
     # Transfer NFT
     file_contract.functions.transferFrom(seller_address, purchaser_address, tokenid).transact({"from": seller_address, "gas": 100000})
     # Transfer Coin
