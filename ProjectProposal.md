@@ -9,7 +9,7 @@
 What new technology should we include:
 Upload feature interact - IPFS
 Implement reward for minting
-Make auction for NFT, then give winner ICO
+Make auction for NFT if time allows, then give winner ICO
 
 
 Rough Breakdown of Tasks: 
