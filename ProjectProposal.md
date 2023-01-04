@@ -5,11 +5,10 @@
 ## Project Outline: Create a Streamlit web application marketplace where users can mint their NFT and receive ICO for their participation in the marketplace in a background dApp
 
 ## Research Questions to Answer: 
-
-What new technology should we include?
-Can we get our smart contracts to use IPFS?
-Can we implement reward for minting?
-Can we create an auction for NFT creation then give winner ICO?
+- What new technology should we include?
+- Can we get our smart contracts to use IPFS?
+- Can we implement reward for minting?
+- Can we create an auction for NFT creation then give winner ICO?
 
 
 Rough Breakdown of Tasks: 
