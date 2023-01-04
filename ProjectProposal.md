@@ -1,4 +1,4 @@
-# Project Title: MINT
+# Project Title: MINT Marketplace
 
 ## Team Members: Yu Takahashi, Tracie Stipp, Silvano Ross, Saidee Padilla
 
