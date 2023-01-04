@@ -1,4 +1,4 @@
-# Project Title: 
+# Project Title: MINT
 
 ## Team Members: Yu Takahashi, Tracie Stipp, Silvano Ross, Saidee Padilla
 
@@ -6,9 +6,16 @@
 
 ## Research Questions to Answer: 
 
-What new technology should we include?
-Upload feature interact - IPFS?
+What new technology should we include:
+Upload feature interact - IPFS
+Implement reward for minting
 Make auction for NFT, then give winner ICO
 
 
-Rough Breakdown of Tasks: Streamlit interface/outline, Smart Contract for Coin, smart contract for reward upon NFT creation, Smart Contract for NFT, Ledger for NFTs minted/history or IPFS, display for auction contract if time
+Rough Breakdown of Tasks: 
+
+Streamlit interface/outline - Silvano/Yu
+Smart Contract for Coin - Basic constructor for a coin called MINT - Saidee Padilla
+smart contract for reward upon NFT creation -  Yu
+Smart Contract minting/registry - Tracie 
+IPFS, display for auction contract if time - Silvano
