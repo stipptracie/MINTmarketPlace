@@ -1,4 +1,3 @@
-
 # Main file for pinning files to ipfs system and generating metadata
 import os
 import json
@@ -9,12 +8,10 @@ import streamlit as st
 # personalized functions for api usage
 from pinata_helper import pin_file_to_ipfs, pin_json_to_ipfs, convert_data_to_json
 
-
 # load environment variables
 load_dotenv()
 
 # Define and connect a new Web3 provider
-
 w3 = Web3(Web3.HTTPProvider(os.getenv("WEB_PROVIDER_URI")))
 
 #################################################################################
@@ -44,6 +41,8 @@ def pin_file(file_name, associated_account, creator_name, desired_file):
 #################################################################################
 #------------------------------ Smart Contracts --------------------------------#
 #################################################################################
+
+# Load MintToken and FileToken abis
 
 @st.cache(allow_output_mutation=True)
 def load_mint_contract():
@@ -80,11 +79,20 @@ def load_file_contract():
 #------------------------------ Streamlit app ----------------------------------#
 #################################################################################
 
+
+### Main Page ###
+st.title("MINT Marketplace")
+st.write("A place to create an NFT of any file and earn rewards in MINT coin")
+st.write("You can sell your registered")
+st.write("You will receive 500 MINT coins for registering your art")
+st.write("You will also receive a File Token that the NFT for your art")
+
+
+### Sidebar ###
+
 # Title and info
-st.sidebar.title("Mint Market Place")
-st.sidebar.write("A place to create an NFT of any file and earn rewards in MINT coin")
-st.sidebar.write("You will receive 500 MINT coins for registering your art")
-st.sidebar.write("You will also receive a File Token that the NFT for your art")
+st.sidebar.title("Register Your NFT as a File Token")
+
 
 # account that will be associated with file upload and reward
 accounts = w3.eth.accounts
@@ -163,6 +171,12 @@ if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward"):
     # st.write(f"You received 1 unique FLT and 500 MNT tokens")
     # st.write(f"Your current balance of MNT is ___ ")
     st.sidebar.balloons() 
+
+#@TODO
+# PIN METADATA
+# LINK MINT COIN CROWDSALE WITH FILETOKEN
+
+
 
 
 
