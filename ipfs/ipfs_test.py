@@ -1,3 +1,4 @@
+
 # Main file for pinning files to ipfs system and generating metadata
 import os
 import json
@@ -8,10 +9,12 @@ import streamlit as st
 # personalized functions for api usage
 from pinata_helper import pin_file_to_ipfs, pin_json_to_ipfs, convert_data_to_json
 
+
 # load environment variables
 load_dotenv()
 
 # Define and connect a new Web3 provider
+
 w3 = Web3(Web3.HTTPProvider(os.getenv("WEB_PROVIDER_URI")))
 
 #################################################################################
@@ -166,6 +169,7 @@ if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward"):
 #@TODO
 # PIN METADATA
 # LINK MINT COIN CROWDSALE WITH FILETOKEN
+
 
 
 
