@@ -14,6 +14,7 @@ from pinata_helper import pin_file_to_ipfs, pin_json_to_ipfs, convert_data_to_js
 load_dotenv()
 
 # Define and connect a new Web3 provider
+
 w3 = Web3(Web3.HTTPProvider(os.getenv("WEB_PROVIDER_URI")))
 
 #################################################################################
@@ -44,6 +45,7 @@ def pin_file(file_name, associated_account, creator_name, desired_file):
 #------------------------------ Smart Contracts --------------------------------#
 #################################################################################
 
+
 # Load MintToken and FileToken abis
 
 @st.cache(allow_output_mutation=True)
@@ -65,6 +67,7 @@ def load_mint_contract():
 @st.cache(allow_output_mutation=True)
 def load_file_contract():
     
+
     file_contract_address = os.getenv("FILE_REGISTRY_ADDRESS")
 
     with open(Path('./compiled_contracts/file_token_abi.json')) as f:
@@ -121,15 +124,18 @@ def get_balance(address):
 st.sidebar.title("Mint Market Place")
 st.sidebar.write("A place to create an NFT of any file and earn rewards in MINT coin")
 st.sidebar.write("You will receive 500 MINT coins for registering your art")
+
 st.sidebar.write("You will also receive a File Token that is the NFT ID for your art")
 
 # Initialize file registry contract
 file_contract = load_file_contract()
 
+
 # account that will be associated with file upload and reward
 accounts = w3.eth.accounts
 
 # select account
+
 address = st.sidebar.selectbox(
     "Select Account Associated with File", options=accounts)
 
@@ -147,6 +153,8 @@ file = st.sidebar.file_uploader("Choose File to Mint", type=[
     "jpeg", "jpg", "png", "pdf", "gif", 
     "txt", "docx", "ppt", "csv", "mp3", "mp4", "wav", "xlsx"
     ])
+# Load File Token Contract for registry
+file_contract = load_file_contract()
 
 # Make the button that does it all
 if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward"):
@@ -168,14 +176,15 @@ if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward"):
     ).transact({'from': address, 'gas': 1000000})
     # receipt for unique file token
     file_token_receipt = w3.eth.waitForTransactionReceipt(tx_hash_file)
-    st.sidebar.write("File Minted:")
     
+
+    # Confirmations
     tokenID = file_contract.functions.totalSupply().call()
-    
     st.sidebar.write(f"Your NFT is File Token #{tokenID}")
     st.sidebar.write("You can view the pinned metadata file with the following IPFS Gateway Link")
     st.sidebar.markdown(f"[File IPFS Gateway Link](https://ipfs.io/ipfs/{file_ipfs_hash})")
     st.sidebar.write(dict(file_token_receipt))
+    
     # Transfer 500 coins from store owner to person who registers
     # convert 500 wei to eth
     reward = w3.toWei(500, "ether")
@@ -196,8 +205,6 @@ if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward"):
 # LINK MINT COIN CROWDSALE WITH FILETOKEN
 
 #----------------------------- NFT Transfer ------------------------------------#
-
-
 
 
 
