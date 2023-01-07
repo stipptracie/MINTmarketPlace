@@ -45,23 +45,6 @@ tokenid = int(st.number_input("Enter tokenid", 0, 50))
 tokenURI = "Unique IPFS Addres (URL/URI) will be set"
 #######################
 
-# Assign NFT to a file
-if st.button("Mint NFT"):
-    file_contract.functions.mint(seller_address, tokenid, tokenURI).transact({"from": store_address, "gas": 6721970})
-    # Display token ID
-    st.write(tokenid)
-
-
-########## NFT Transfer Ownership ##########
-# Set purchaser address
-purchaser_address = st.text_input("Enter Purchaser's address")
-# Set purchasing price
-offer_amount = int(st.number_input("How much would you pay?"))
-
-
-
-
-
 
 # FOR DEVELOPING PURPOSE ONLY #
 @st.cache(allow_output_mutation=True)
