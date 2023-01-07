@@ -1,4 +1,3 @@
-
 # Main file for pinning files to ipfs system and generating metadata
 import os
 import json
@@ -156,9 +155,3 @@ if st.button("Mint NFT and Receive a Reward"):
 #@TODO
 # PIN METADATA
 # LINK MINT COIN CROWDSALE WITH FILETOKEN
-
-
-
-
-
-
