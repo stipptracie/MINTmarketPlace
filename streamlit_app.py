@@ -46,13 +46,11 @@ tokenURI = "Unique IPFS Addres (URL/URI) will be set"
 #######################
 
 
-
 ########## NFT Transfer Ownership ##########
 # Set purchaser address
 purchaser_address = st.text_input("Enter Purchaser's address")
 # Set purchasing price
 offer_amount = int(st.number_input("How much would you pay?"))
-
 
 
 # FOR DEVELOPING PURPOSE ONLY #
@@ -65,7 +63,6 @@ def give_coin_for_developing():
     # Store -> NFT minter
     coin_contract.functions.transfer(seller_address, 500000000).transact({"from": store_address, "gas": 100000})
 give_coin_for_developing()
-
 
 
 # Transfer NFT and coin
