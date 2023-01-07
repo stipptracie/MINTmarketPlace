@@ -1,3 +1,4 @@
+
 # Main file for pinning files to ipfs system and generating metadata
 import os
 import json
@@ -8,10 +9,12 @@ import streamlit as st
 # personalized functions for api usage
 from pinata_helper import pin_file_to_ipfs, pin_json_to_ipfs, convert_data_to_json
 
+
 # load environment variables
 load_dotenv()
 
 # Define and connect a new Web3 provider
+
 w3 = Web3(Web3.HTTPProvider(os.getenv("WEB_PROVIDER_URI")))
 
 #################################################################################
@@ -40,8 +43,6 @@ def pin_file(file_name, associated_account, desired_file):
 #################################################################################
 #------------------------------ Smart Contracts --------------------------------#
 #################################################################################
-
-# Load MNT and FLT abis
 
 @st.cache(allow_output_mutation=True)
 def load_mint_contract():
@@ -155,6 +156,7 @@ if st.button("Mint NFT and Receive a Reward"):
 #@TODO
 # PIN METADATA
 # LINK MINT COIN CROWDSALE WITH FILETOKEN
+
 
 
 
