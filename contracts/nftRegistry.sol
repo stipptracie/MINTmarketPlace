@@ -1,15 +1,25 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol";
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+pragma solidity ^0.5.2;
+import "https://github.com/athiwatp/openzeppelin-solidity/blob/master/contracts/token/ERC721/ERC721Full.sol";
 
-contract MyNFT is Ownable, ERC721URIStorage {      
-    // name and symbol
-    constructor() ERC721("__________", "______") {
+contract MyNFT is ERC721Full {
+    address payable owner;
+
+    // naming the token, "FileToken" for each individual uploaded file
+    constructor() public ERC721Full("FileToken", "FLT") {}
+
+    modifier onlyOwner {
+    require(msg.sender == owner, "You do not have permission to mint these tokens!");
+    _;
     }
-    function mint(address recipient, uint256 tokenId, 
-    string memory tokenURI) public onlyOwner {        
+
+    // function for user to register/mint artwork with unique token
+    function mint(address recipient, string memory tokenURI) public onlyOwner returns(uint256) {        
+        
+        uint256 tokenId = totalSupply();
         _mint(recipient, tokenId);
-        _setTokenURI(tokenId, tokenURI);        
+        _setTokenURI(tokenId, tokenURI);
+
+        return tokenId;        
     }
 }

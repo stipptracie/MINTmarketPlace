@@ -36,7 +36,7 @@ def load_contract(contract_name):
 
 # Load contracts
 coin_contract = load_contract("InAppCoin")
-file_contract = load_contract("file_token")
+file_contract = load_contract("nftRegistry")
 
 # Set web store owner address to the smart contracts
 store_address = os.getenv("STORE_OWNER_WALLET_ADDRESS")
@@ -118,9 +118,9 @@ if st.button("Mint NFT and Receive a Reward"):
     print(seller_address, file_name, file_uri)
         
     # Generate FLT for user address for uploading file
-    tx_hash_file = file_contract.functions.registerFile(seller_address, file_uri).transact({'from': seller_address, 'gas': 1000000})
+    tokenid = file_contract.functions.mint(seller_address, file_uri).transact({'from': seller_address, 'gas': 1000000})
     # receipt for unique file token
-    file_token_receipt = w3.eth.waitForTransactionReceipt(tx_hash_file)
+    file_token_receipt = w3.eth.waitForTransactionReceipt(tokenid)
     st.write("File Minted:")
     st.write(dict(file_token_receipt))
             
@@ -145,7 +145,7 @@ if st.button("Mint NFT and Receive a Reward"):
 ########## NFT Transfer Ownership ##########
 # Title and descriptions
 st.sidebar.title("NFT Transfer")
-
+purchaser_address = st.sidebar.text_input("Enter Purchaser's address")
 
 # Transfer NFT and coin
 if st.sidebar.button ("Transfer NFT Ownership"):
@@ -173,18 +173,17 @@ if st.sidebar.button ("Transfer NFT Ownership"):
     coin_contract.functions.transfer(seller_address, 500).transact({"from": store_address, "gas": 100000})
 
     ########## Show Coin Balance ##########
-    st.markdown("## Seller Balance")
-    st.write(coin_contract.functions.balanceOf(seller_address).call())
-    st.markdown("## Purchaser Balance")
-    st.write(coin_contract.functions.balanceOf(purchaser_address).call())
+    st.sidebar.markdown("## Seller Balance")
+    st.sidebar.write(coin_contract.functions.balanceOf(seller_address).call())
+    st.sidebar.markdown("## Purchaser Balance")
+    st.sidebar.write(coin_contract.functions.balanceOf(purchaser_address).call())
 
 
     ########## NFT Transfer ##########
-    tokenid = file_contract.functions.tokenId().call()
     file_contract.functions.transferFrom(seller_address, purchaser_address, tokenid).transact({"from": seller_address, "gas": 100000})
     # Display owner
-    st.markdown(f"## Current Owner of the NFT token id {tokenid}")
-    st.write(file_contract.functions.ownerOf(tokenid).call())
+    st.sidebar.markdown(f"## Current Owner of the NFT token id {tokenid}")
+    st.sidebar.write(file_contract.functions.ownerOf(tokenid).call())
 
 
-    st.markdown("# Thank you for participating")
+    st.sidebar.markdown("# Thank you for participating")
