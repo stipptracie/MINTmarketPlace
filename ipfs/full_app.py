@@ -79,11 +79,20 @@ def load_file_contract():
 #------------------------------ Streamlit app ----------------------------------#
 #################################################################################
 
+
+### Main Page ###
+st.title("MINT Marketplace")
+st.write("A place to create an NFT of any file and earn rewards in MINT coin")
+st.write("You can sell your registered")
+st.write("You will receive 500 MINT coins for registering your art")
+st.write("You will also receive a File Token that the NFT for your art")
+
+
+### Sidebar ###
+
 # Title and info
-st.sidebar.title("Mint Market Place")
-st.sidebar.write("A place to create an NFT of any file and earn rewards in MINT coin")
-st.sidebar.write("You will receive 500 MINT coins for registering your art")
-st.sidebar.write("You will also receive a File Token that the NFT for your art")
+st.sidebar.title("Register Your NFT as a File Token")
+
 
 # account that will be associated with file upload and reward
 accounts = w3.eth.accounts
