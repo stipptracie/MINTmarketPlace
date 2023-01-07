@@ -45,8 +45,6 @@ def pin_file(file_name, associated_account, creator_name, desired_file):
 #------------------------------ Smart Contracts --------------------------------#
 #################################################################################
 
-# Load MintToken and FileToken abis
-
 @st.cache(allow_output_mutation=True)
 def load_mint_contract():
 
@@ -165,13 +163,6 @@ if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward"):
     # st.write(f"You received 1 unique FLT and 500 MNT tokens")
     # st.write(f"Your current balance of MNT is ___ ")
     st.sidebar.balloons() 
-
-#@TODO
-# PIN METADATA
-# LINK MINT COIN CROWDSALE WITH FILETOKEN
-
-
-
 
 
 
