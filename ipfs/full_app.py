@@ -12,6 +12,7 @@ from pinata_helper import pin_file_to_ipfs, pin_json_to_ipfs, convert_data_to_js
 load_dotenv()
 
 # Define and connect a new Web3 provider
+
 w3 = Web3(Web3.HTTPProvider(os.getenv("WEB_PROVIDER_URI")))
 
 #################################################################################
@@ -36,7 +37,6 @@ def pin_file(file_name, associated_account, creator_name, desired_file):
     json_ipfs_hash = pin_json_to_ipfs(json_data)
 
     return json_ipfs_hash
-
 
 #################################################################################
 #------------------------------ Smart Contracts --------------------------------#
@@ -72,6 +72,7 @@ def load_file_contract():
         address=file_contract_address,
         abi=file_token_abi
     )
+
     return file_token_contract
 
 
@@ -175,8 +176,4 @@ if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward"):
 #@TODO
 # PIN METADATA
 # LINK MINT COIN CROWDSALE WITH FILETOKEN
-
-
-
-
 
