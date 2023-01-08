@@ -17,4 +17,4 @@ Streamlit interface/outline - Silvano/Yu
 Smart Contract for Coin - Basic constructor for a coin called MINT - Saidee Padilla
 smart contract for reward upon NFT creation -  Yu
 Smart Contract minting/registry - Tracie 
-IPFS, display for auction contract if time - Silvano
+
