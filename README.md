@@ -1,3 +1,15 @@
+Editing Notes
+
+- .deps: solidity dependacies
+- bin: draft files
+- contracts: final solidity files and compiled json files
+- screenshot: for readme
+- full_app.py: final streamlit app
+- pinata_helper.py: includes functions used in full_app.py
+- SAMPLE.env: .env file sample
+
+---
+
 # FinTech Capstone: NFT Marketplace
 
 ## Table of Contents
