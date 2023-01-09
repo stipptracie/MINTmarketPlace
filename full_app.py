@@ -45,19 +45,19 @@ def pin_file(file_name, associated_account, creator_name, desired_file):
 # Load MintToken and FileToken abis
 
 @st.cache(allow_output_mutation=True)
-def load_mint_contract():
+def load_coin_contract():
 
-    mint_contract_address = os.getenv("MINT_TOKEN_ADDRESS")
+    mint_contract_address = os.getenv("InAppCoin_TOKEN_ADDRESS")
 
-    with open(Path('./compiled_contracts/mint_abi.json')) as f:
-        mint_abi = json.load(f)
+    with open(Path('/contracts/compiled/InAppCoin_abi.json')) as f:
+        coin_abi = json.load(f)
         
     # 1. Load MintToken contract
-    mint_contract = w3.eth.contract(
+    coin_contract = w3.eth.contract(
         address=mint_contract_address,
-        abi=mint_abi
+        abi=coin_abi
     )
-    return mint_contract
+    return coin_contract
 
 # 2. Load FileToken contract
 @st.cache(allow_output_mutation=True)
@@ -65,7 +65,7 @@ def load_file_contract():
     
     file_contract_address = os.getenv("FILE_TOKEN_ADDRESS")
 
-    with open(Path('./compiled_contracts/file_token_abi.json')) as f:
+    with open(Path('/contracts/compiled/file_token_abi.json')) as f:
         file_token_abi = json.load(f)
 
     file_token_contract = w3.eth.contract(
@@ -75,6 +75,23 @@ def load_file_contract():
 
     return file_token_contract
 
+#################################################################################
+#------------------------------ Coin transfers ---------------------------------#
+#################################################################################
+# Set web store owner address to the smart contracts
+store_address = os.getenv("STORE_OWNER_WALLET_ADDRESS")
+
+### Mint Some Coin First For Developing ###
+@st.cache(allow_output_mutation=True)
+def mint_coin_for_developing():
+    coin_contract = load_coin_contract()
+    coin_contract.functions.mint(store_address, 1000000000).transact({"from": store_address, "gas": 100000})
+mint_coin_for_developing()
+
+@st.cache(allow_output_mutation=True)
+def transfer_coin_from_store_to_address(address, amount):
+    coin_contract = load_coin_contract()
+    coin_contract.functions.transfer(address, amount).transact({"from": store_address, "gas": 100000})
 
 #################################################################################
 #------------------------------ Streamlit app ----------------------------------#
@@ -149,31 +166,49 @@ if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward"):
        
     
     # # Mint 500 new MNTs for user address
-    # mint_contract = load_mint_contract()
-    # #renounce minter
-    # mint_contract.functions.renounceMinter().call()
-    # print("################# Minter renounced Successfully ###############")
-    # # add current address as minter
-    # mint_contract.functions.addMinter(address).transact({'from': address, 'gas': 1000000})
-    # print("################# New Minter added Successfully ###############")
-    # # mint 500 tokens to address
-    # mint_hash_file = mint_contract.functions.mint(address, 500).transact({'from': address, 'gas': 1000000})
+    coin_contract = load_coin_contract()
+    transfer_coin_from_store_to_address(address, 500)
+    st.write("Coins Created:")
+    coin_balance = st.write(coin_contract.functions.balanceOf(address).call())
+    st.write(f"You now have {coin_balance} MINT coins at address {address}")
     
-    # mint_token_receipt = w3.eth.waitForTransactionReceipt(mint_hash_file)
-    # st.sidebar.write("MINT coins minted:")
-    # st.sidebar.write(dict(mint_token_receipt))
-    # mint_balance = mint_contract.MintToken.balanceOf(address).call()
-    # st.write(f"You now have {mint_balance} MINT coins at address {address}")
-    
-    
-    
-    # Print Confirmations
-    # st.write("File Minted")
-    # st.write(f"You received 1 unique FLT and 500 MNT tokens")
-    # st.write(f"Your current balance of MNT is ___ ")
     st.sidebar.balloons() 
 
-#@TODO
-# PIN METADATA
-# LINK MINT COIN CROWDSALE WITH FILETOKEN
+########## Transfer NFT and reward coin ##########
+# Set purchasing price and address
+offer_amount = int(st.sidebar.number_input("How much would you pay?"))
+purchaser_address = st.sidebar.selectbox("Select Buyer's Account", options=accounts)
 
+if st.sidebar.button ("Transfer NFT Ownership"):
+    #################### FOR DEVELOPING PURPOSE ONLY ####################
+    #### Give out coins to purchaser to simulate buy-sell activities ####
+    transfer_coin_from_store_to_address(purchaser_address, 50000)
+    #####################################################################
+
+    ########## Coin Transfer ##########
+    # Transfer coin
+    coin_contract.functions.transfer(address, offer_amount).transact({"from":purchaser_address, "gas": 100000})
+
+    ########## Coin Offering ##########
+    # Store -> NFT purchaser
+    coin_contract.functions.transfer(purchaser_address, 500).transact({"from": store_address, "gas": 100000})
+    # Store -> NFT minter
+    coin_contract.functions.transfer(address, 500).transact({"from": store_address, "gas": 100000})
+
+    ########## Show Coin Balance ##########
+    st.sidebar.markdown("## Seller Balance")
+    st.sidebar.write(coin_contract.functions.balanceOf(address).call())
+    st.sidebar.markdown("## Purchaser Balance")
+    st.sidebar.write(coin_contract.functions.balanceOf(purchaser_address).call())
+
+
+    ########## NFT Transfer ##########
+    nft_id = int(file_contract.functions.totalSupply().call())
+    st.sidebar.write(nft_id)
+    file_contract.functions.transferFrom(address, purchaser_address, nft_id).transact({"from": store_address, "gas": 5555555})
+    # Display owner
+    st.sidebar.markdown(f"## Current Owner of the NFT token id {nft_id}")
+    st.sidebar.write(file_contract.functions.ownerOf(nft_id).call())
+
+
+    st.sidebar.markdown("# Thank you for participating")
