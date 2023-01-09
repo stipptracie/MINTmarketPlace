@@ -7,7 +7,6 @@ contract Auction {
     event Bid(address indexed sender, uint amount);
 
     // Set variables for later use
-    address public store;
     bool public started;
     bool public ended;
     uint public endAt;
@@ -15,18 +14,16 @@ contract Auction {
     address public highestBidder;
 
     // Create mapping/dictionary to save bids
-    mapping(address => uint) public bids;
+    mapping(address => uint) public bids; // {address: uint} bids[address] = uint
 
     // Initialize/set store variable
-    constructor() {
-        store = msg.sender;
-    }
+    constructor() {}
 
     // Start auction
-    function start(uint startingBid) external {
+    function start(uint startingBid, address seller) external {
         // Check if the auction is started by the website owner
+        require(msg.sender == seller, "You're not authorized.");
         require(!started, "Already started.");
-        require(msg.sender == store, "You are not authorized.");
         started = true;
         endAt = block.timestamp + 3 minutes; // AUCTION TIME SET AS 3 MINUTES FOR DEVELOPING PURPOSE
         highestBid = startingBid;
@@ -44,19 +41,19 @@ contract Auction {
 
         // Save new bidder in the mapping/dictionary
         if (highestBidder != address(0)) {
+            highestBid = amount;
+            highestBidder = msg.sender;
             bids[highestBidder] += highestBid;
         }
-        highestBid = amount;
-        highestBidder = msg.sender;
+        
 
         // Record this event on blockchain
         emit Bid(highestBidder, highestBid);
     }
 
     // End auction
-    function end() external {
-        // Check if the auction is ended by the website owner
-        require(msg.sender == store, "You are not authorized.");
+    function end(address seller) external {
+        require(msg.sender == seller, "You're not authorized.");
         // Check if the auction exists and pre-set ending time is met
         require(started, "Auction does not exist.");
         require(block.timestamp >= endAt, "Auction has not ended.");
