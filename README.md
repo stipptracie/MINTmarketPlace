@@ -142,6 +142,11 @@ To run the application, clone the code from this GitHub repository.
 
 ## Outcome and Summary
 
+### NFT Minting
+![Minting](screenshot/nft_minting.PNG)
+
+### NFT Transferring with ICO
+![Transfer](screenshot/nft_transfer.PNG)
 
 
 ### Optimization and Debugging Opportunities
