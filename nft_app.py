@@ -5,6 +5,7 @@ from web3 import Web3
 from pathlib import Path
 from dotenv import load_dotenv
 import streamlit as st
+import sys
 # personalized functions for api usage
 from ipfs.pinata_helper import pin_file_to_ipfs, pin_json_to_ipfs, convert_data_to_json
 
@@ -37,6 +38,7 @@ def load_contract(contract_name):
 # Load contracts
 coin_contract = load_contract("InAppCoin")
 file_contract = load_contract("nftRegistry")
+auction_contract = load_contract("AuctionContract")
 
 # Set web store owner address to the smart contracts
 store_address = os.getenv("STORE_OWNER_WALLET_ADDRESS")
@@ -97,7 +99,6 @@ seller_address = st.selectbox("Select Account Associated with File", options=acc
 
 st.markdown("---")
 
-
 # choose the file name 
 file_name = st.text_input("Enter the File Name: ")
 
@@ -118,17 +119,17 @@ if st.button("Mint NFT and Receive a Reward"):
     print(seller_address, file_name, file_uri)
         
     # Generate FLT for user address for uploading file
-    tokenid = file_contract.functions.mint(seller_address, file_uri).transact({'from': seller_address, 'gas': 1000000})
+    tokenid = file_contract.functions.mint(seller_address, file_uri).transact({'from': store_address, 'gas': 1000000})
     # receipt for unique file token
     file_token_receipt = w3.eth.waitForTransactionReceipt(tokenid)
-    st.write("File Minted:")
+    st.write(f"File token ID: {int.from_bytes(tokenid, sys.byteorder)}, File Minted:")
     st.write(dict(file_token_receipt))
             
     # mint 500 InAppCoin to address as a reward for participating
     mint_hash_file = transfer_coin_from_store_to_address(seller_address, 500)
-    ico_receipt = w3.eth.waitForTransactionReceipt(mint_hash_file)
+    #ico_receipt = w3.eth.waitForTransactionReceipt(mint_hash_file)
     st.write("Coins Created:")
-    st.write(dict(ico_receipt))
+    #st.write(dict(ico_receipt))
     coin_balance = st.write(coin_contract.functions.balanceOf(seller_address).call())
     st.write(f"You now have {coin_balance} MINT coins at address {seller_address}")
     
@@ -142,29 +143,60 @@ if st.button("Mint NFT and Receive a Reward"):
 #################################################################################
 #------------------------ Streamlit app - Sidebar ------------------------------#
 #################################################################################
-########## NFT Transfer Ownership ##########
+
+"""
+########## NFT Auction ##########
 # Title and descriptions
-st.sidebar.title("NFT Transfer")
-purchaser_address = st.sidebar.text_input("Enter Purchaser's address")
+st.sidebar.title("NFT Auction")
+starting_price = int(st.sidebar.number_input("Enter Starting Price"))
 
-# Transfer NFT and coin
+# Start auction
+if st.sidebar.button("Start Auction"):
+    auction_contract.functions.start(starting_price, seller_address).transact({"from": seller_address, "gas": 100000})
+    # Show auction ending time
+    st.sidebar.write(auction_contract.functions.endAt().call())
+
+# Show current price
+st.sidebar.write(auction_contract.functions.highestBid().call())
+
+
+# Bid
+bidder_address = st.sidebar.selectbox("Select Account", options=accounts)
+amount = int(st.sidebar.number_input("Enter the amount you're offering"))
+if st.sidebar.button("Bid"):
+    amount = auction_contract.functions.bid(amount).transact({"from": bidder_address})
+    # Show auction ending time
+    st.sidebar.write(auction_contract.functions.endAt().call())
+    # Show current price
+    st.sidebar.write(auction_contract.functions.highestBid().call())
+    # Show current winner
+    st.sidebar.write(auction_contract.functions.highestBidder().call())
+
+
+# End auction
+if st.sidebar.button("End Auction"):
+    auction_contract.functions.end(seller_address).transact({"from": seller_address, "gas": 100000})
+    purchaser_address = auction_contract.functions.highestBidder().call()
+    # Show final price
+    st.sidebar.write(auction_contract.functions.highestBid().call())
+    # Show final winner
+    st.sidebar.write(auction_contract.functions.highestBidder().call())
+"""
+
+########## Transfer NFT and reward coin ##########
+# Set purchasing price and address
+offer_amount = int(st.sidebar.number_input("How much would you pay?"))
+purchaser_address = st.sidebar.selectbox("Select Buyer's Account", options=accounts)
+
 if st.sidebar.button ("Transfer NFT Ownership"):
-    # Set purchaser address
-    purchaser_address = st.sidebar.text_input("Enter Purchaser's address")
-
     #################### FOR DEVELOPING PURPOSE ONLY ####################
     #### Give out coins to purchaser to simulate buy-sell activities ####
-    transfer_coin_from_store_to_address(purchaser_address)
+    transfer_coin_from_store_to_address(purchaser_address, 50000)
     #####################################################################
-
-    # Set purchasing price
-    offer_amount = int(st.sidebar.number_input("How much would you pay?"))
 
     ########## Coin Transfer ##########
     # Transfer coin
-    coin_contract.functions.approve(seller_address, offer_amount).transact({"from": purchaser_address, "gas": 100000})
-    coin_contract.functions.transferFrom(purchaser_address, seller_address, offer_amount).transact({"from":seller_address, "gas":100000})
-    #coin_contract.functions.decreaseAllowance(seller_address, offer_amount).transact({"from": purchaser_address, "gas": 100000})
+    coin_contract.functions.transfer(seller_address, offer_amount).transact({"from":purchaser_address, "gas": 100000})
 
     ########## Coin Offering ##########
     # Store -> NFT purchaser
@@ -180,10 +212,12 @@ if st.sidebar.button ("Transfer NFT Ownership"):
 
 
     ########## NFT Transfer ##########
-    file_contract.functions.transferFrom(seller_address, purchaser_address, tokenid).transact({"from": seller_address, "gas": 100000})
+    nft_id = int(file_contract.functions.totalSupply().call())
+    st.sidebar.write(nft_id)
+    file_contract.functions.transferFrom(seller_address, purchaser_address, nft_id).transact({"from": seller_address, "gas": 5555555})
     # Display owner
-    st.sidebar.markdown(f"## Current Owner of the NFT token id {tokenid}")
-    st.sidebar.write(file_contract.functions.ownerOf(tokenid).call())
+    st.sidebar.markdown(f"## Current Owner of the NFT token id {nft_id}")
+    st.sidebar.write(file_contract.functions.ownerOf(nft_id).call())
 
 
     st.sidebar.markdown("# Thank you for participating")

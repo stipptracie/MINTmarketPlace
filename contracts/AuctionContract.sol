@@ -68,7 +68,7 @@ contract Auction {
 /*
 Start Auction
 
-    contract.functions.start(starting_price).transact({"from": store_address, "gas": 100000})
+    contract.functions.start(starting_price, seller_address).transact({"from": store_address, "gas": 100000})
 
 Accept Bids
 
@@ -88,5 +88,5 @@ Show Auction End Time
 
 End Auction
 
-    contract.fuctions.end().transact({"from": store_address, "gas": 100000})
+    contract.fuctions.end(seller_address).transact({"from": store_address, "gas": 100000})
 */
