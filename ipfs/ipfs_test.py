@@ -6,6 +6,7 @@ from web3 import Web3
 from pathlib import Path
 from dotenv import load_dotenv
 import streamlit as st
+import pandas as pd
 # personalized functions for api usage
 from pinata_helper import pin_file_to_ipfs, pin_json_to_ipfs, convert_data_to_json
 
@@ -111,6 +112,23 @@ def get_balance(address):
 
 
 #################################################################################
+#------------------------------ Create NFT Registry ----------------------------#
+#################################################################################
+
+# Create pandas dataframe of registry info
+# Try reading the data
+try:    
+    registry_df = pd.read_csv(Path('./nft_registry.csv'))
+except:
+    # Create Dataframe for csv file
+    registry_df = pd.DataFrame({
+        "TokenID": 0,
+        "FileName": [],
+        "IPFS": []
+    })
+    
+
+#################################################################################
 #------------------------------ Streamlit app ----------------------------------#
 #################################################################################
 
@@ -147,6 +165,8 @@ file = st.sidebar.file_uploader("Choose File to Mint", type=[
     "jpeg", "jpg", "png", "pdf", "gif", 
     "txt", "docx", "ppt", "csv", "mp3", "mp4", "wav", "xlsx"
     ])
+
+
 
 # Make the button that does it all
 if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward"):
@@ -189,14 +209,58 @@ if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward"):
     balance_ether = w3.fromWei(balance_wei, "ether")
     st.sidebar.write(f"You have a balance of {balance_ether:.2f} MINT coins!")
     st.sidebar.balloons() 
+    
+    
+    ### Update NFT dictionary
+    nft_data = {"TokenID": tokenID,
+                "FileName": file_name,
+                "IPFS": file_uri
+                }
+    # turn nft_data to a dataframe
+    registry_df = registry_df.append(nft_data, ignore_index=True, sort=False)
+    registry_df.to_csv("nft_registry.csv", index=False)
+    
+           
+    
 
 #@TODO
-# PIN METADATA
 # Display for what has been registered so far
-# LINK MINT COIN CROWDSALE WITH FILETOKEN
+
 
 #----------------------------- NFT Transfer ------------------------------------#
 
+st.title("Buy a Previously Minted NFT")
+
+buy_col, display_col = st.columns(2)
+
+# with buy_col:
+#         buyer = st.text_input("Enter the Buyer's Address")
+        
+# #         #@TODO
+#         amount_of_sale = st.number_input("Enter amount to buy in eth")
+#         # Select NFT to buy
+#         options = []
+#         for row in registry_df.rows:
+#             options.append(row["TokenID"])
+#         option = st.selectbox(options=options)    
+#         # Set seller as owner of NFT
+#         owner = file_contract.functions.ownerOf(option).call()
+#         # transfer funds from buyer to seller
+#         # if transfer successful
+#         try:
+#             mint_contract.functions.transferFrom(buyer, owner, amount_of_sale).transact({"from": buyer, "gas": 100000
+#             })
+#             file_contract.functions.transferFrom(owner, buyer, option).transact({"from": buyer, "gas": 100000})
+#         # call transfer of NFT from seller to buyer
+        
+    
+with display_col:
+    st.write("NFT Registry")
+    # nft_df = pd.DataFrame(registry_info)
+    try:
+        st.dataframe(registry_df)
+    except:
+        pass
 
 
 
