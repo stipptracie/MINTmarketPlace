@@ -1,3 +1,4 @@
+
 Editing Notes
 
 - .deps: solidity dependacies
@@ -179,4 +180,3 @@ Project Team
 
 [OpenZeppelin Contracts Wizard](https://docs.openzeppelin.com/contracts/4.x/wizard) </br>
 [OpenZeppelin ERC721 Docs](https://docs.openzeppelin.com/contracts/3.x/api/token/erc721#IERC721-setApprovalForAll-address-bool-)</br>
-
