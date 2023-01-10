@@ -52,7 +52,7 @@ def load_mint_contract():
 
     mint_contract_address = os.getenv("MINT_TOKEN_ADDRESS")
 
-    with open(Path('./compiled_contracts/mint_abi.json')) as f:
+    with open(Path('./compiled_contracts/in_app_coin_abi.json')) as f:
         mint_abi = json.load(f)
         
     # 1. Load MintToken contract
@@ -68,7 +68,7 @@ def load_file_contract():
     
     file_contract_address = os.getenv("FILE_REGISTRY_ADDRESS")
 
-    with open(Path('./compiled_contracts/file_token_abi.json')) as f:
+    with open(Path('./compiled_contracts/file_registry_abi.json')) as f:
         file_token_abi = json.load(f)
 
     file_token_contract = w3.eth.contract(
@@ -233,25 +233,30 @@ st.title("Buy a Previously Minted NFT")
 
 buy_col, display_col = st.columns(2)
 
-# with buy_col:
-#         buyer = st.text_input("Enter the Buyer's Address")
+with buy_col:
+        buyer = st.text_input("Enter the Buyer's Address")
         
-# #         #@TODO
-#         amount_of_sale = st.number_input("Enter amount to buy in eth")
-#         # Select NFT to buy
-#         options = []
-#         for row in registry_df.rows:
-#             options.append(row["TokenID"])
-#         option = st.selectbox(options=options)    
-#         # Set seller as owner of NFT
-#         owner = file_contract.functions.ownerOf(option).call()
-#         # transfer funds from buyer to seller
-#         # if transfer successful
-#         try:
-#             mint_contract.functions.transferFrom(buyer, owner, amount_of_sale).transact({"from": buyer, "gas": 100000
-#             })
-#             file_contract.functions.transferFrom(owner, buyer, option).transact({"from": buyer, "gas": 100000})
-#         # call transfer of NFT from seller to buyer
+#         #@TODO
+        amount_of_sale = st.number_input("Enter amount to buy in eth")
+        # Select NFT to buy
+        options = []
+        for row in registry_df.iterrows():
+            options.append(row[1][0])
+        option = st.selectbox(label="Pick the NFT you would like to buy",options=options)    
+        # Set seller as owner of NFT
+        owner = file_contract.functions.ownerOf(option).call()
+        # transfer funds from buyer to seller
+        # if transfer successful
+        if st.button("Buy NFT Now"):
+            try:
+                mint_contract.functions.transferFrom(buyer, owner, amount_of_sale).transact({"from": buyer, "gas": 100000
+                })
+                file_contract.functions.transferFrom(owner, buyer, option).transact({"from": buyer, "gas": 100000})
+                st.write(f"You successfully transfered NFT {option} from {owner} to {buyer}")
+            except:
+                st.write("The payment failed")
+                print("The payment did not go through or the seller did not authorize the sale")
+        # call transfer of NFT from seller to buyer
         
     
 with display_col:
