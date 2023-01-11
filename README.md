@@ -39,21 +39,14 @@ MINT's goal is to support local and emerging artists and provide them a fast and
 
 Our NFT auction marketplace provides:
 1. A platform that connects artists and collectors through blockchain technology with complete transparency. It holds asset/token/deed that is to be auctioned using ERC721 standards.
-2. Ability to place bids in auctions, over a decentralized network with following functions and features: </br>
->
-        - ability to participate in an English auction whereby bid prices keep increasing over the duration of the auction.
-        - ability to monitor the auction process (start bid, bid price, highest bidder etc.)
-        - ability to view the frequency of each bidder
-        - safe and secure transfer of NFT ownership upon auction completion
-        - safe and secure transfer of funds upon auction completion
-        - refund of funds to bidders that did not get not lucky
-3. Works with digital assests stored over an established and secure file storage system (IPFS - Pinata)
-5. MINT does not charge any fees or retain any of the profits from the NFT sales hence providing a free of cost platform for the artists. As opposed to OpenSea, who charge a chunky one-time registration fee to list each NFT as well as recurring fees.
+2. Works with digital assests stored over an established and secure file storage system (IPFS - Pinata)
+3. ERC20 Token as a reward for participating in the ecosystem. This would be a benefit for upcoming projects.
+4. MINT does not charge any fees or retain any of the profits from the NFT sales hence providing a free of cost platform for the artists. As opposed to OpenSea, who charge a chunky one-time registration fee to list each NFT as well as recurring fees.
 
 ## Development and Technologies
 ---
 
-Our NFT marketplace is build using the following technologies: 
+Our NFT marketplace is builT using the following technologies: 
 * Solidity (smart contracts)
 * Remix IDE
 * Streamlit (frontend)
@@ -76,10 +69,20 @@ Our NFT marketplace is build using the following technologies:
 * typing
 * openzeppelin (ERC721, ERC721URIStorage, Ownable, Counters)
 
-
 ## Instructions - Environment Preparation
 ---
+
+Demonstration of Steps
 [![StreamlitApp](https://img.youtube.com/vi/oqq1MAU4CQg/0.jpg)](https://www.youtube.com/watch?v=oqq1MAU4CQg)
+
+
+
+
+
+IPFS - Pinata
+
+MetaMask verification of ERC20 "MINT" Token
+
 
 ## Outcome and Summary
 
@@ -88,7 +91,6 @@ Our NFT marketplace is build using the following technologies:
 
 ### NFT Transferring with ICO
 ![Transfer](screenshot/nft_transfer.PNG)
-
 
 ### Optimization and Debugging Opportunities
 
