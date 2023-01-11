@@ -79,8 +79,7 @@ Our NFT marketplace is build using the following technologies:
 
 ## Instructions - Environment Preparation
 ---
-<iframe width="560" height="315" src="https://www.youtube.com/embed/oqq1MAU4CQg" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-
+[![StreamlitApp](https://img.youtube.com/vi/oqq1MAU4CQg/0.jpg)](https://www.youtube.com/watch?v=oqq1MAU4CQg)
 
 ## Outcome and Summary
 
