@@ -108,7 +108,7 @@ Created by Yu Takahashi, Silvano Ross, Saidee Padilla and Tracie Stipp while in 
 >
 > email: yu.taka.070202@gmail.com |
 > [GitHub](https://github.com/yutakadayo) |
-> [LinkedIn]()
+> [LinkedIn](https://www.linkedin.com/in/yu-takahashi-068472235/)
 >
 > email: silvanoross3@gmail.com |
 > [GitHub](https://github.com/silvanoross) |
