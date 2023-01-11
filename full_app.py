@@ -5,8 +5,10 @@ from web3 import Web3
 from pathlib import Path
 from dotenv import load_dotenv
 import streamlit as st
+
 import pandas as pd
 import numpy as np
+
 # personalized functions for api usage
 from pinata_helper import pin_file_to_ipfs, pin_json_to_ipfs, convert_data_to_json
 
@@ -149,7 +151,9 @@ file = st.sidebar.file_uploader("Choose File to Mint", type=[
     "jpeg", "jpg", "png", "pdf", "gif", "txt", "docx", "ppt", "csv", "mp3", "mp4", "wav", "xlsx"
     ])
 
+
 counter = 0
+
 # Make the button that does it all
 if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward"):
     
@@ -171,11 +175,13 @@ if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward"):
     tx_hash_file = file_contract.functions.registerFile(
         address,
         file_uri
+
     ).transact({'from': address, 'gas': 5555555})
     # receipt for unique file token
     file_token_receipt = w3.eth.waitForTransactionReceipt(tx_hash_file)
     st.sidebar.write("File Minted:")
     tokenID = file_contract.functions.totalSupply().call() -1
+
     st.sidebar.write(f"Your NFT is File Token #{tokenID}")
     st.sidebar.write("You can view the pinned metadata file with the following IPFS Gateway Link")
     st.sidebar.markdown(f"[File IPFS Gateway Link](https://ipfs.io/ipfs/{file_ipfs_hash})")
@@ -189,6 +195,7 @@ if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward"):
     coin_balance = st.write(coin_contract.functions.balanceOf(address).call())
     st.write(f"You now have {coin_balance} MINT coins at address {address}")
     
+
     st.sidebar.balloons()
 
     ### Update NFT dictionary
@@ -265,3 +272,4 @@ with display_col:
         st.dataframe(registry_df)
     except:
         pass
+

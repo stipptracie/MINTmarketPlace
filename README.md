@@ -102,6 +102,7 @@ ___
 ## Contributors
 ---
 Project Team
+
 Created by Yu Takahashi, Silvano Ross, Saidee Padilla and Tracie Stipp while in the UW FinTech Bootcamp
 > Contact Info:
 >
