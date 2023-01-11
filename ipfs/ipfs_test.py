@@ -1,3 +1,4 @@
+
 # Main file for pinning files to ipfs system and generating metadata
 import os
 import json
@@ -5,19 +6,16 @@ from web3 import Web3
 from pathlib import Path
 from dotenv import load_dotenv
 import streamlit as st
-
 import pandas as pd
-import numpy as np
-
 # personalized functions for api usage
 from pinata_helper import pin_file_to_ipfs, pin_json_to_ipfs, convert_data_to_json
+
 
 # load environment variables
 load_dotenv()
 
 # Define and connect a new Web3 provider
-
-w3 = Web3(Web3.HTTPProvider(os.getenv("WEB3_PROVIDER_URI")))
+w3 = Web3(Web3.HTTPProvider(os.getenv("WEB_PROVIDER_URI")))
 
 #################################################################################
 #-------------------------------- IFPS Helper ----------------------------------#
@@ -42,59 +40,76 @@ def pin_file(file_name, associated_account, creator_name, desired_file):
 
     return json_ipfs_hash
 
+
 #################################################################################
 #------------------------------ Smart Contracts --------------------------------#
 #################################################################################
 
 # Load MintToken and FileToken abis
+
 @st.cache(allow_output_mutation=True)
-def load_contract(contract_name):
+def load_mint_contract():
 
-    # Load ABI
-    with open(Path(f"./contracts/compiled/{contract_name}_abi.json")) as f:
-        abi = json.load(f)
+    mint_contract_address = os.getenv("MINT_TOKEN_ADDRESS")
 
-    # Set the contract address (this is the address of the deployed contract)
-    contract_address = os.getenv(f"{contract_name}_SMART_CONTRACT_ADDRESS")
-
-    # Get the contract using web3
-    contract = w3.eth.contract(address=contract_address, abi=abi)
-
-    return contract
-
-coin_contract = load_contract("InAppCoin")
+    with open(Path('./compiled_contracts/mint_abi.json')) as f:
+        mint_abi = json.load(f)
+        
+    # 1. Load MintToken contract
+    mint_contract = w3.eth.contract(
+        address=mint_contract_address,
+        abi=mint_abi
+    )
+    return mint_contract
 
 # 2. Load FileToken contract
 @st.cache(allow_output_mutation=True)
 def load_file_contract():
     
-    file_contract_address = os.getenv("FILE_TOKEN_ADDRESS")
+    file_contract_address = os.getenv("FILE_REGISTRY_ADDRESS")
 
-    with open(Path('./contracts/compiled/file_token_abi.json')) as f:
+    with open(Path('./compiled_contracts/file_token_abi.json')) as f:
         file_token_abi = json.load(f)
 
     file_token_contract = w3.eth.contract(
         address=file_contract_address,
         abi=file_token_abi
     )
-
     return file_token_contract
 
 #################################################################################
-#------------------------------ Coin transfers ---------------------------------#
+#------------------------------ Coin Functions ---------------------------------#
 #################################################################################
-# Set web store owner address to the smart contracts
-store_address = os.getenv("STORE_OWNER_WALLET_ADDRESS")
 
-### Mint Some Coin First For Developing ###
+### Mint Coins for Initial Supply ###
+# Set store owner
+store_owner_address = os.getenv("STORE_OWNER_ADDRESS")
+# Load MINT token contract
+mint_contract = load_mint_contract()
+# Define function for minting intial coin to store owner 
+initial_supply_mint = w3.toWei(1000000000, "ether")
 @st.cache(allow_output_mutation=True)
-def mint_coin_for_developing():
-    coin_contract.functions.mint(store_address, 1000000000).transact({"from": store_address, "gas": 100000})
-mint_coin_for_developing()
+def mint_coin_for_owner():
+    mint_contract.functions.mint(store_owner_address, initial_supply_mint).transact({
+        "from": store_owner_address, "gas": 100000})
+    
+# call function to mint intial supply
+mint_coin_for_owner()
+print("1000000000 MINT coins have been put into circulation")
+
+# define transfer function for 
+@st.cache(allow_output_mutation=True)
+def reward_coin(store_owner, recipient_address, amount):
+    mint_contract.functions.transfer(
+        recipient=recipient_address, amount=amount
+        ).transact({
+        "from": store_owner, "gas": 100000
+        })
 
 @st.cache(allow_output_mutation=True)
-def transfer_coin_from_store_to_address(address, amount):
-    coin_contract.functions.transfer(address, amount).transact({"from": store_address, "gas": 100000})
+def get_balance(address):
+    mint_contract.functions.balanceOf(address)
+
 
 #################################################################################
 #------------------------------ Create NFT Registry ----------------------------#
@@ -103,7 +118,7 @@ def transfer_coin_from_store_to_address(address, amount):
 # Create pandas dataframe of registry info
 # Try reading the data
 try:    
-    registry_df = pd.read_csv(Path('nft_registry.csv'))
+    registry_df = pd.read_csv(Path('./nft_registry.csv'))
 except:
     # Create Dataframe for csv file
     registry_df = pd.DataFrame({
@@ -111,31 +126,30 @@ except:
         "FileName": [],
         "IPFS": []
     })
+    
 
 #################################################################################
 #------------------------------ Streamlit app ----------------------------------#
 #################################################################################
 
 
-### Main Page ###
-st.title("MINT Marketplace")
-st.markdown("### A place to create an NFT of any file and earn rewards in MINT coin")
-st.markdown("### You can sell your registered")
-st.markdown("### You will receive 500 MINT coins for registering your art")
-st.markdown("### You will also receive a File Token that the NFT for your art")
-
-
-### Sidebar ###
+#----------------------------- Sidebar Registry --------------------------------#
 
 # Title and info
-st.sidebar.title("Register Your NFT as a File Token")
+st.sidebar.title("Mint Market Place")
+st.sidebar.write("A place to create an NFT of any file and earn rewards in MINT coin")
+st.sidebar.write("You will receive 500 MINT coins for registering your art")
+st.sidebar.write("You will also receive a File Token that is the NFT ID for your art")
 
+# Initialize file registry contract
+file_contract = load_file_contract()
 
 # account that will be associated with file upload and reward
 accounts = w3.eth.accounts
 
 # select account
-address = st.sidebar.selectbox("Select Account Associated with File", options=accounts)
+address = st.sidebar.selectbox(
+    "Select Account Associated with File", options=accounts)
 
 st.sidebar.markdown("---")
 
@@ -148,11 +162,11 @@ creator_name = st.sidebar.text_input("Enter A Creator Name: ")
 
 # file uploader that allows many different kinds of files
 file = st.sidebar.file_uploader("Choose File to Mint", type=[
-    "jpeg", "jpg", "png", "pdf", "gif", "txt", "docx", "ppt", "csv", "mp3", "mp4", "wav", "xlsx"
+    "jpeg", "jpg", "png", "pdf", "gif", 
+    "txt", "docx", "ppt", "csv", "mp3", "mp4", "wav", "xlsx"
     ])
 
 
-counter = 0
 
 # Make the button that does it all
 if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward"):
@@ -167,37 +181,36 @@ if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward"):
     print(address, creator_name, file_name, file_uri)
     print(file_ipfs_hash)
     
-    
-    
-    
     # Generate File Token for user address for uploading file
-    file_contract = load_file_contract()
     tx_hash_file = file_contract.functions.registerFile(
         address,
         file_uri
-
-    ).transact({'from': address, 'gas': 5555555})
+    ).transact({'from': address, 'gas': 1000000})
     # receipt for unique file token
     file_token_receipt = w3.eth.waitForTransactionReceipt(tx_hash_file)
     st.sidebar.write("File Minted:")
-    tokenID = file_contract.functions.totalSupply().call() -1
-
+    
+    tokenID = file_contract.functions.totalSupply().call()
+    
     st.sidebar.write(f"Your NFT is File Token #{tokenID}")
     st.sidebar.write("You can view the pinned metadata file with the following IPFS Gateway Link")
     st.sidebar.markdown(f"[File IPFS Gateway Link](https://ipfs.io/ipfs/{file_ipfs_hash})")
-    st.sidebar.markdown(f"Metadata URI: {file_uri}")
     st.sidebar.write(dict(file_token_receipt))
-       
+    # Transfer 500 coins from store owner to person who registers
+    # convert 500 wei to eth
+    reward = w3.toWei(500, "ether")
+    reward_coin(
+        store_owner=store_owner_address,
+        recipient_address=address, 
+        amount=reward)
+    print("Coins rewarded")
+    # Show balance of MINT coins at bottom of sidebar
+    balance_wei = mint_contract.functions.balanceOf(address).call()
+    balance_ether = w3.fromWei(balance_wei, "ether")
+    st.sidebar.write(f"You have a balance of {balance_ether:.2f} MINT coins!")
+    st.sidebar.balloons() 
     
-    # # Mint 500 new MNTs for user address
-    transfer_coin_from_store_to_address(address, 500)
-    st.write("Coins Created:")
-    coin_balance = st.write(coin_contract.functions.balanceOf(address).call())
-    st.write(f"You now have {coin_balance} MINT coins at address {address}")
     
-
-    st.sidebar.balloons()
-
     ### Update NFT dictionary
     nft_data = {"TokenID": tokenID,
                 "FileName": file_name,
@@ -206,63 +219,39 @@ if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward"):
     # turn nft_data to a dataframe
     registry_df = registry_df.append(nft_data, ignore_index=True, sort=False)
     registry_df.to_csv("nft_registry.csv", index=False)
+    
+           
+    
+
+#@TODO
+# Display for what has been registered so far
 
 
-st.write()
-st.write()
-st.write()
-st.write()
-st.write()
-st.write()
-
-
-########## Transfer NFT and reward coin ##########
+#----------------------------- NFT Transfer ------------------------------------#
 
 st.title("Buy a Previously Minted NFT")
 
 buy_col, display_col = st.columns(2)
 
-with buy_col:
-    purchaser_address = st.selectbox("Select Buyer's Account", options=accounts, key="buyer")
-    # Select NFT to buy
-    options = [row[1]["TokenID"] for row in registry_df.iterrows()]
-    option = st.selectbox("Select NFT You want to transfer", options=options)
-    offer_amount = int(st.number_input("How much would you pay?"))
-    if st.button ("Transfer NFT Ownership"):
-        #################### FOR DEVELOPING PURPOSE ONLY ####################
-        #### Give out coins to purchaser to simulate buy-sell activities ####
-        transfer_coin_from_store_to_address(purchaser_address, 50000)
-        #####################################################################
-        # Set seller as owner of NFT
-        file_contract = load_file_contract()
-        owner = file_contract.functions.ownerOf(int(option)).call()
-
-        ########## Coin Transfer ##########
-        # Transfer coin
-        coin_contract.functions.transfer(owner, offer_amount).transact({"from":purchaser_address, "gas": 100000})
-
-        ########## Coin Offering ##########
-        # Store -> NFT purchaser
-        coin_contract.functions.transfer(purchaser_address, 500).transact({"from": store_address, "gas": 100000})
-        # Store -> NFT minter
-        coin_contract.functions.transfer(owner, 500).transact({"from": store_address, "gas": 100000})
-
-        ########## Show Coin Balance ##########
-        st.markdown("## Seller Balance")
-        st.write(coin_contract.functions.balanceOf(owner).call())
-        st.markdown("## Purchaser Balance")
-        st.write(coin_contract.functions.balanceOf(purchaser_address).call())
-
-
-        ########## NFT Transfer ##########
-        file_contract = load_file_contract()
-        file_contract.functions.transferFrom(owner, purchaser_address, int(option)).transact({"from": owner, "gas": 5555555})
-        # Display owner
-        st.markdown(f"## Current Owner of the NFT Token Id {option}")
-        st.write(file_contract.functions.ownerOf(option).call())
-
-        st.markdown("# Thank you for participating")
+# with buy_col:
+#         buyer = st.text_input("Enter the Buyer's Address")
         
+# #         #@TODO
+#         amount_of_sale = st.number_input("Enter amount to buy in eth")
+#         # Select NFT to buy
+#         options = []
+#         for row in registry_df.rows:
+#             options.append(row["TokenID"])
+#         option = st.selectbox(options=options)    
+#         # Set seller as owner of NFT
+#         owner = file_contract.functions.ownerOf(option).call()
+#         # transfer funds from buyer to seller
+#         # if transfer successful
+#         try:
+#             mint_contract.functions.transferFrom(buyer, owner, amount_of_sale).transact({"from": buyer, "gas": 100000
+#             })
+#             file_contract.functions.transferFrom(owner, buyer, option).transact({"from": buyer, "gas": 100000})
+#         # call transfer of NFT from seller to buyer
         
     
 with display_col:
@@ -272,4 +261,8 @@ with display_col:
         st.dataframe(registry_df)
     except:
         pass
+
+
+
+
 
