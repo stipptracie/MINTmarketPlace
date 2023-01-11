@@ -52,8 +52,9 @@ def load_mint_contract():
 
     mint_contract_address = os.getenv("MINT_TOKEN_ADDRESS")
 
+
     with open(Path('./compiled_contracts/in_app_coin_abi.json')) as f:
-        mint_abi = json.load(f)
+
         
     # 1. Load MintToken contract
     mint_contract = w3.eth.contract(
@@ -68,7 +69,9 @@ def load_file_contract():
     
     file_contract_address = os.getenv("FILE_REGISTRY_ADDRESS")
 
+
     with open(Path('./compiled_contracts/file_registry_abi.json')) as f:
+
         file_token_abi = json.load(f)
 
     file_token_contract = w3.eth.contract(
@@ -93,12 +96,14 @@ initial_supply_mint = w3.toWei(1000000000, "ether")
 def mint_coin_for_owner():
     mint_contract.functions.mint(store_owner_address, initial_supply_mint).transact({
         "from": store_owner_address, "gas": 100000})
+
     reward_message = "1000000000 MINT coins have been put into circulation"
     print(reward_message)
     
 # call function to mint intial supply
 # add sessino state to this function
 mint_coin_for_owner()
+
 
 
 
@@ -110,10 +115,12 @@ def reward_coin(store_owner, recipient_address, amount):
         ).transact({
         "from": store_owner, "gas": 100000
         })
+
     # set approval for rewardee to spend rewarded coin
     mint_contract.functions.approve(recipient_address, amount).transact({
         "from": store_owner, "gas": 100000
     })
+
 
 @st.cache(allow_output_mutation=True)
 def get_balance(address):
@@ -126,6 +133,7 @@ def get_balance(address):
 
 # Create pandas dataframe of registry info
 # Try reading the data
+
 columns=["TokenID", "FileName", "IPFS"]
 try:    
     registry_df = pd.read_csv(Path('./nft_registry.csv'))
@@ -139,7 +147,7 @@ except:
     registry_df = registry_df.astype({"TokenID": "int"})
     registry_df = registry_df.astype({"FileName": "string"})
     registry_df = registry_df.astype({"IPFS": "string"})
-    
+
 
 #################################################################################
 #------------------------------ Streamlit app ----------------------------------#
@@ -162,27 +170,35 @@ accounts = w3.eth.accounts
 
 # select account
 address = st.sidebar.selectbox(
+
     "Select Account Associated with File", options=accounts, key="creator_account")
+
 
 st.sidebar.markdown("---")
 
 
 # choose the file name 
+
 file_name = st.sidebar.text_input("Enter the File Name: ", key="file_name")
 
 # choose creator name
 creator_name = st.sidebar.text_input("Enter A Creator Name: ", key="creator_name")
 
+
 # file uploader that allows many different kinds of files
 file = st.sidebar.file_uploader("Choose File to Mint", type=[
     "jpeg", "jpg", "png", "pdf", "gif", 
     "txt", "docx", "ppt", "csv", "mp3", "mp4", "wav", "xlsx"
+
     ], key="nft_file")
 
 
 
+
 # Make the button that does it all
+
 if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward", key="nft_button"):
+
     
     # Pin artwork to pinata ipfs file
     file_ipfs_hash = pin_file(file_name=file_name,
@@ -204,7 +220,9 @@ if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward", key="nf
     st.sidebar.write("File Minted:")
     
     tokenID = file_contract.functions.totalSupply().call()
+
     tokenID = (tokenID - 1)
+
     
     st.sidebar.write(f"Your NFT is File Token #{tokenID}")
     st.sidebar.write("You can view the pinned metadata file with the following IPFS Gateway Link")
@@ -226,6 +244,7 @@ if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward", key="nf
     
     
     ### Update NFT dictionary
+
     nft_data = {"TokenID": [tokenID],
                "FileName": [file_name],
                 "IPFS": [file_uri]}
@@ -240,6 +259,7 @@ if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward", key="nf
     registry_df = pd.concat([registry_df, nft_df])
     registry_df.to_csv("nft_registry.csv", index=False)
 
+
            
     
 
@@ -252,6 +272,7 @@ if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward", key="nf
 st.title("Buy a Previously Minted NFT")
 
 buy_col, display_col = st.columns(2)
+
 
 with buy_col:
         buyer = st.text_input("Enter the Buyer's Address")
@@ -317,6 +338,7 @@ with buy_col:
         })
             print("Sale reverted and NFT transfer did not occur")
       
+
     
 with display_col:
     st.write("NFT Registry")
@@ -328,7 +350,4 @@ with display_col:
 
 
 
-#################################################################################
-#----------------------------Check Session State -------------------------------#
-#################################################################################
 

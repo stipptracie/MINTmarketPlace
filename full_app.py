@@ -5,6 +5,10 @@ from web3 import Web3
 from pathlib import Path
 from dotenv import load_dotenv
 import streamlit as st
+
+import pandas as pd
+import numpy as np
+
 # personalized functions for api usage
 from pinata_helper import pin_file_to_ipfs, pin_json_to_ipfs, convert_data_to_json
 
@@ -93,6 +97,22 @@ def transfer_coin_from_store_to_address(address, amount):
     coin_contract.functions.transfer(address, amount).transact({"from": store_address, "gas": 100000})
 
 #################################################################################
+#------------------------------ Create NFT Registry ----------------------------#
+#################################################################################
+
+# Create pandas dataframe of registry info
+# Try reading the data
+try:    
+    registry_df = pd.read_csv(Path('nft_registry.csv'))
+except:
+    # Create Dataframe for csv file
+    registry_df = pd.DataFrame({
+        "TokenID": 0,
+        "FileName": [],
+        "IPFS": []
+    })
+
+#################################################################################
 #------------------------------ Streamlit app ----------------------------------#
 #################################################################################
 
@@ -131,6 +151,9 @@ file = st.sidebar.file_uploader("Choose File to Mint", type=[
     "jpeg", "jpg", "png", "pdf", "gif", "txt", "docx", "ppt", "csv", "mp3", "mp4", "wav", "xlsx"
     ])
 
+
+counter = 0
+
 # Make the button that does it all
 if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward"):
     
@@ -152,11 +175,13 @@ if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward"):
     tx_hash_file = file_contract.functions.registerFile(
         address,
         file_uri
-    ).transact({'from': address, 'gas': 1000000})
+
+    ).transact({'from': address, 'gas': 5555555})
     # receipt for unique file token
     file_token_receipt = w3.eth.waitForTransactionReceipt(tx_hash_file)
     st.sidebar.write("File Minted:")
-    tokenID = file_contract.functions.totalSupply().call()
+    tokenID = file_contract.functions.totalSupply().call() -1
+
     st.sidebar.write(f"Your NFT is File Token #{tokenID}")
     st.sidebar.write("You can view the pinned metadata file with the following IPFS Gateway Link")
     st.sidebar.markdown(f"[File IPFS Gateway Link](https://ipfs.io/ipfs/{file_ipfs_hash})")
@@ -170,7 +195,18 @@ if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward"):
     coin_balance = st.write(coin_contract.functions.balanceOf(address).call())
     st.write(f"You now have {coin_balance} MINT coins at address {address}")
     
-    st.sidebar.balloons() 
+
+    st.sidebar.balloons()
+
+    ### Update NFT dictionary
+    nft_data = {"TokenID": tokenID,
+                "FileName": file_name,
+                "IPFS": file_uri
+                }
+    # turn nft_data to a dataframe
+    registry_df = registry_df.append(nft_data, ignore_index=True, sort=False)
+    registry_df.to_csv("nft_registry.csv", index=False)
+
 
 st.write()
 st.write()
@@ -181,42 +217,59 @@ st.write()
 
 
 ########## Transfer NFT and reward coin ##########
-st.title("Transfer NFT and get coin")
-# Set purchasing price and address
-offer_amount = int(st.number_input("How much would you pay?"))
-purchaser_address = st.selectbox("Select Buyer's Account", options=accounts)
 
-if st.button ("Transfer NFT Ownership"):
-    #################### FOR DEVELOPING PURPOSE ONLY ####################
-    #### Give out coins to purchaser to simulate buy-sell activities ####
-    transfer_coin_from_store_to_address(purchaser_address, 50000)
-    #####################################################################
+st.title("Buy a Previously Minted NFT")
 
-    ########## Coin Transfer ##########
-    # Transfer coin
-    coin_contract.functions.transfer(address, offer_amount).transact({"from":purchaser_address, "gas": 100000})
+buy_col, display_col = st.columns(2)
 
-    ########## Coin Offering ##########
-    # Store -> NFT purchaser
-    coin_contract.functions.transfer(purchaser_address, 500).transact({"from": store_address, "gas": 100000})
-    # Store -> NFT minter
-    coin_contract.functions.transfer(address, 500).transact({"from": store_address, "gas": 100000})
+with buy_col:
+    purchaser_address = st.selectbox("Select Buyer's Account", options=accounts, key="buyer")
+    # Select NFT to buy
+    options = [row[1]["TokenID"] for row in registry_df.iterrows()]
+    option = st.selectbox("Select NFT You want to transfer", options=options)
+    offer_amount = int(st.number_input("How much would you pay?"))
+    if st.button ("Transfer NFT Ownership"):
+        #################### FOR DEVELOPING PURPOSE ONLY ####################
+        #### Give out coins to purchaser to simulate buy-sell activities ####
+        transfer_coin_from_store_to_address(purchaser_address, 50000)
+        #####################################################################
+        # Set seller as owner of NFT
+        file_contract = load_file_contract()
+        owner = file_contract.functions.ownerOf(int(option)).call()
 
-    ########## Show Coin Balance ##########
-    st.markdown("## Seller Balance")
-    st.write(coin_contract.functions.balanceOf(address).call())
-    st.markdown("## Purchaser Balance")
-    st.write(coin_contract.functions.balanceOf(purchaser_address).call())
+        ########## Coin Transfer ##########
+        # Transfer coin
+        coin_contract.functions.transfer(owner, offer_amount).transact({"from":purchaser_address, "gas": 100000})
+
+        ########## Coin Offering ##########
+        # Store -> NFT purchaser
+        coin_contract.functions.transfer(purchaser_address, 500).transact({"from": store_address, "gas": 100000})
+        # Store -> NFT minter
+        coin_contract.functions.transfer(owner, 500).transact({"from": store_address, "gas": 100000})
+
+        ########## Show Coin Balance ##########
+        st.markdown("## Seller Balance")
+        st.write(coin_contract.functions.balanceOf(owner).call())
+        st.markdown("## Purchaser Balance")
+        st.write(coin_contract.functions.balanceOf(purchaser_address).call())
 
 
-    ########## NFT Transfer ##########
-    file_contract = load_file_contract()
-    nft_id = int(file_contract.functions.totalSupply().call()) -1
-    st.write(nft_id)
-    file_contract.functions.transferFrom(address, purchaser_address, nft_id).transact({"from": address, "gas": 5555555})
-    # Display owner
-    st.markdown(f"## Current Owner of the NFT token id {nft_id}")
-    st.write(file_contract.functions.ownerOf(nft_id).call())
+        ########## NFT Transfer ##########
+        file_contract = load_file_contract()
+        file_contract.functions.transferFrom(owner, purchaser_address, int(option)).transact({"from": owner, "gas": 5555555})
+        # Display owner
+        st.markdown(f"## Current Owner of the NFT Token Id {option}")
+        st.write(file_contract.functions.ownerOf(option).call())
 
+        st.markdown("# Thank you for participating")
+        
+        
+    
+with display_col:
+    st.write("NFT Registry")
+    # nft_df = pd.DataFrame(registry_info)
+    try:
+        st.dataframe(registry_df)
+    except:
+        pass
 
-    st.markdown("# Thank you for participating")
