@@ -52,8 +52,9 @@ def load_mint_contract():
 
     mint_contract_address = os.getenv("MINT_TOKEN_ADDRESS")
 
-    with open(Path('./compiled_contracts/mint_abi.json')) as f:
-        mint_abi = json.load(f)
+
+    with open(Path('./compiled_contracts/in_app_coin_abi.json')) as f:
+
         
     # 1. Load MintToken contract
     mint_contract = w3.eth.contract(
@@ -68,7 +69,9 @@ def load_file_contract():
     
     file_contract_address = os.getenv("FILE_REGISTRY_ADDRESS")
 
-    with open(Path('./compiled_contracts/file_token_abi.json')) as f:
+
+    with open(Path('./compiled_contracts/file_registry_abi.json')) as f:
+
         file_token_abi = json.load(f)
 
     file_token_contract = w3.eth.contract(
@@ -88,14 +91,21 @@ store_owner_address = os.getenv("STORE_OWNER_ADDRESS")
 mint_contract = load_mint_contract()
 # Define function for minting intial coin to store owner 
 initial_supply_mint = w3.toWei(1000000000, "ether")
+
 @st.cache(allow_output_mutation=True)
 def mint_coin_for_owner():
     mint_contract.functions.mint(store_owner_address, initial_supply_mint).transact({
         "from": store_owner_address, "gas": 100000})
+
+    reward_message = "1000000000 MINT coins have been put into circulation"
+    print(reward_message)
     
 # call function to mint intial supply
+# add sessino state to this function
 mint_coin_for_owner()
-print("1000000000 MINT coins have been put into circulation")
+
+
+
 
 # define transfer function for 
 @st.cache(allow_output_mutation=True)
@@ -105,6 +115,12 @@ def reward_coin(store_owner, recipient_address, amount):
         ).transact({
         "from": store_owner, "gas": 100000
         })
+
+    # set approval for rewardee to spend rewarded coin
+    mint_contract.functions.approve(recipient_address, amount).transact({
+        "from": store_owner, "gas": 100000
+    })
+
 
 @st.cache(allow_output_mutation=True)
 def get_balance(address):
@@ -117,16 +133,21 @@ def get_balance(address):
 
 # Create pandas dataframe of registry info
 # Try reading the data
+
+columns=["TokenID", "FileName", "IPFS"]
 try:    
     registry_df = pd.read_csv(Path('./nft_registry.csv'))
+    registry_df = registry_df.astype({"TokenID": "int"})
+    registry_df = registry_df.astype({"FileName": "string"})
+    registry_df = registry_df.astype({"IPFS": "string"})
 except:
-    # Create Dataframe for csv file
-    registry_df = pd.DataFrame({
-        "TokenID": 0,
-        "FileName": [],
-        "IPFS": []
-    })
     
+    registry_df = pd.DataFrame(columns=columns)
+    # change datatypes to int, string, string
+    registry_df = registry_df.astype({"TokenID": "int"})
+    registry_df = registry_df.astype({"FileName": "string"})
+    registry_df = registry_df.astype({"IPFS": "string"})
+
 
 #################################################################################
 #------------------------------ Streamlit app ----------------------------------#
@@ -149,27 +170,35 @@ accounts = w3.eth.accounts
 
 # select account
 address = st.sidebar.selectbox(
-    "Select Account Associated with File", options=accounts)
+
+    "Select Account Associated with File", options=accounts, key="creator_account")
+
 
 st.sidebar.markdown("---")
 
 
 # choose the file name 
-file_name = st.sidebar.text_input("Enter the File Name: ")
+
+file_name = st.sidebar.text_input("Enter the File Name: ", key="file_name")
 
 # choose creator name
-creator_name = st.sidebar.text_input("Enter A Creator Name: ")
+creator_name = st.sidebar.text_input("Enter A Creator Name: ", key="creator_name")
+
 
 # file uploader that allows many different kinds of files
 file = st.sidebar.file_uploader("Choose File to Mint", type=[
     "jpeg", "jpg", "png", "pdf", "gif", 
     "txt", "docx", "ppt", "csv", "mp3", "mp4", "wav", "xlsx"
-    ])
+
+    ], key="nft_file")
+
 
 
 
 # Make the button that does it all
-if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward"):
+
+if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward", key="nft_button"):
+
     
     # Pin artwork to pinata ipfs file
     file_ipfs_hash = pin_file(file_name=file_name,
@@ -191,6 +220,9 @@ if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward"):
     st.sidebar.write("File Minted:")
     
     tokenID = file_contract.functions.totalSupply().call()
+
+    tokenID = (tokenID - 1)
+
     
     st.sidebar.write(f"Your NFT is File Token #{tokenID}")
     st.sidebar.write("You can view the pinned metadata file with the following IPFS Gateway Link")
@@ -212,14 +244,22 @@ if st.sidebar.button("Mint NFT, Receive IPFS file and Receive a Reward"):
     
     
     ### Update NFT dictionary
-    nft_data = {"TokenID": tokenID,
-                "FileName": file_name,
-                "IPFS": file_uri
-                }
-    # turn nft_data to a dataframe
-    registry_df = registry_df.append(nft_data, ignore_index=True, sort=False)
-    registry_df.to_csv("nft_registry.csv", index=False)
+
+    nft_data = {"TokenID": [tokenID],
+               "FileName": [file_name],
+                "IPFS": [file_uri]}
+    nft_df = pd.DataFrame(nft_data, columns=columns)
+    nft_df = nft_df.astype({"TokenID": "int"})
+    nft_df = nft_df.astype({"FileName": "string"})
+    nft_df = nft_df.astype({"IPFS": "string"})
     
+    # turn nft_data to a dataframe
+    print("registry dataframe")
+    print(registry_df)
+    registry_df = pd.concat([registry_df, nft_df])
+    registry_df.to_csv("nft_registry.csv", index=False)
+
+
            
     
 
@@ -233,26 +273,72 @@ st.title("Buy a Previously Minted NFT")
 
 buy_col, display_col = st.columns(2)
 
-# with buy_col:
-#         buyer = st.text_input("Enter the Buyer's Address")
+
+with buy_col:
+        buyer = st.text_input("Enter the Buyer's Address")
+        buyer = buyer.strip('"')
+#         #@TODO
+        amount_of_sale = st.number_input("Enter amount to buy in eth", key="amount_of_sale")
+        amount_of_sale = int(amount_of_sale)
+        # Select NFT to buy
+        options = []
+        try:
+            for row in registry_df.iterrows():
+                options.append(row[1][0])
+            option = st.selectbox(label="Pick the NFT you would like to buy",options=options)  
+        except:
+            pass
+        # Set seller as owner of NFT
+        try:
+            nft_owner = file_contract.functions.ownerOf(option).call()
+            nft_owner = nft_owner.strip('"')
+            st.write(f"The owner of nft {option} is {nft_owner}")
+        except:
+            pass
+            
+        # transfer funds from buyer to seller
+        # if transfer successful
+        if st.button("Buy NFT Now", key="buy_button"):
+            
+            mint_contract.functions.approve(
+                    buyer, amount_of_sale).transact({
+                        "from": buyer, "gas": 1000000
+                })
+            # Approve transfer ability for owner of NFT
+            mint_contract.functions.transferFrom(
+                    buyer, nft_owner.strip("'"), int(amount_of_sale)).transact({
+                        "from": buyer, "gas": 1000000
+                })
+            
+                # decrease spending allowance for buyer by amount spent
+            mint_contract.functions.decreaseAllowance(
+                buyer, amount_of_sale).transact({
+                    "from": buyer, "gas": 1000000
+            })
+            st.write("Successful Sale")
+            
+            # Approve movement of NFT
+            file_contract.functions.approve(buyer.strip('"'), int(option)).transact({
+                "from": nft_owner, "gas": 1000000
+            })
+            
+            # Next complete transfer of nft to new owner
+            file_contract.functions.transferFrom(nft_owner, buyer.strip('"'), int(option)).transact({
+                "from": buyer, "gas": 1000000
+            })
+            st.write("successful transfer of NFT")
+            
+            new_owner = file_contract.functions.ownerOf(option).call()
+            print(f"{new_owner} is now owner of File: {option}")
+            st.write(f"{new_owner} is now owner of File: {option}")
         
-# #         #@TODO
-#         amount_of_sale = st.number_input("Enter amount to buy in eth")
-#         # Select NFT to buy
-#         options = []
-#         for row in registry_df.rows:
-#             options.append(row["TokenID"])
-#         option = st.selectbox(options=options)    
-#         # Set seller as owner of NFT
-#         owner = file_contract.functions.ownerOf(option).call()
-#         # transfer funds from buyer to seller
-#         # if transfer successful
-#         try:
-#             mint_contract.functions.transferFrom(buyer, owner, amount_of_sale).transact({"from": buyer, "gas": 100000
-#             })
-#             file_contract.functions.transferFrom(owner, buyer, option).transact({"from": buyer, "gas": 100000})
-#         # call transfer of NFT from seller to buyer
-        
+            mint_contract.functions.transferFrom(
+            nft_owner, buyer,  amount_of_sale).transact({
+                "from": nft_owner, "gas": 1000000
+        })
+            print("Sale reverted and NFT transfer did not occur")
+      
+
     
 with display_col:
     st.write("NFT Registry")
@@ -261,7 +347,6 @@ with display_col:
         st.dataframe(registry_df)
     except:
         pass
-
 
 
 
