@@ -1,4 +1,4 @@
-# FinTech Capstone: NFT Marketplace
+# MINT NFT Marketplace
 
 ## Table of Contents
 * [Description](#description)
