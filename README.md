@@ -93,7 +93,13 @@ To run the application, clone the code from this GitHub repository.
 ### IPFS/Pinata
 [![StreamlitApp](https://img.youtube.com/vi/RsCRE-JZNAk/0.jpg)](https://www.youtube.com/watch?v=RsCRE-JZNAk)
 >
-MetaMask verification of ERC20 "MINT" Token</br>
+### NFT Minting
+![Minting](screenshot/nft_minting.PNG)
+>
+### NFT Transferring with ICO
+![Transfer](screenshot/nft_transfer.PNG)
+>
+### MetaMask verification of ERC20 "MINT" Token</br>
 [![StreamlitApp](https://img.youtube.com/vi/ovsfEm_JYNc/0.jpg)](https://www.youtube.com/watch?v=ovsfEm_JYNc)
 >
 
