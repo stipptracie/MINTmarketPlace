@@ -3,13 +3,10 @@
 ## Table of Contents
 * [Description](#description)
 * [Goals](#project-goals)
-* [Data Collection and Preparation](#data-collection-and-preparation)
 * [Development and Technologies](#development-and-technologies)
 * [Instructions](#instructions)
-* [Video Demo](#video-demo)
 * [Outcome And Summary](#outcome-and-summary)
 * [Contributors](#contributors)
-* [References and Resources](#references-and-resources)
 
 ## Description
 ---
