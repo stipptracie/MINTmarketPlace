@@ -1,16 +1,3 @@
-
-Editing Notes
-
-- .deps: solidity dependacies
-- bin: draft files
-- contracts: final solidity files and compiled json files
-- screenshot: for readme
-- full_app.py: final streamlit app
-- pinata_helper.py: includes functions used in full_app.py
-- SAMPLE.env: .env file sample
-
----
-
 # FinTech Capstone: NFT Marketplace
 
 ## Table of Contents
@@ -23,8 +10,6 @@ Editing Notes
 * [Outcome And Summary](#outcome-and-summary)
 * [Contributors](#contributors)
 * [References and Resources](#references-and-resources)
-
-
 
 ## Description
 ---
@@ -39,25 +24,17 @@ MINT's goal is to support local and emerging artists and provide them a fast and
 
 Our NFT auction marketplace provides:
 1. A platform that connects artists and collectors through blockchain technology with complete transparency. It holds asset/token/deed that is to be auctioned using ERC721 standards.
-2. Ability to place bids in auctions, over a decentralized network with following functions and features: </br>
->
-        - ability to participate in an English auction whereby bid prices keep increasing over the duration of the auction.
-        - ability to monitor the auction process (start bid, bid price, highest bidder etc.)
-        - ability to view the frequency of each bidder
-        - safe and secure transfer of NFT ownership upon auction completion
-        - safe and secure transfer of funds upon auction completion
-        - refund of funds to bidders that did not get not lucky
-3. Works with digital assests stored over an established and secure file storage system (IPFS - Pinata)
-5. MINT does not charge any fees or retain any of the profits from the NFT sales hence providing a free of cost platform for the artists. As opposed to OpenSea, who charge a chunky one-time registration fee to list each NFT as well as recurring fees.
+2. Works with digital assests stored over an established and secure file storage system (IPFS - Pinata)
+3. ERC20 Token as a reward for participating in the ecosystem. This would be a benefit for upcoming projects.
+4. MINT does not charge any fees or retain any of the profits from the NFT sales hence providing a free of cost platform for the artists. As opposed to OpenSea, who charge a chunky one-time registration fee to list each NFT as well as recurring fees.
 
 ## Development and Technologies
 ---
 
-Our NFT marketplace is build using the following technologies: 
+Our NFT marketplace is built using the following technologies: 
 * Solidity (smart contracts)
 * Remix IDE
 * Streamlit (frontend)
-* MetaMask (wallet)
 * Decentralized Blockchain Network (Ganache)
 * Pinata
 * Python
@@ -66,8 +43,6 @@ Our NFT marketplace is build using the following technologies:
 * os
 * json
 * requests
-* eth_account
-* eth_typing
 * web3
 * pathlib
 * dotenv
@@ -76,22 +51,60 @@ Our NFT marketplace is build using the following technologies:
 * typing
 * openzeppelin (ERC721, ERC721URIStorage, Ownable, Counters)
 
-
 ## Instructions - Environment Preparation
 ---
-[Instructional setup Video](https://youtu.be/oqq1MAU4CQg)
+### Files:
+Download the following files to help you get started:
+
+1. [InAppCoin.sol](./contracts/InAppCoin.sol)
+2. [file_registry.sol](./contracts/file_registry.sol)
+
+### Remix Steps:
+
+To run the application, clone the code from this GitHub repository.
+
+1. Compile the `InAppCoin.sol` to ensure it compiles without any errors. 
+2. Compile the `file_registry.sol` to ensure it is compiled successfully.
+3. Prior to deployment, ensure your Ganache Provider is connected and the corresponding wallet is selected.
+4. Deploy the `InAppCoin.sol` and check the deployed contracts to ensure it is there. Copy the address to the .env file.
+5. Deploy the `file_registry.sol` and check the deployed contract to ensure it is there. Copy the address to the .env file.
+6. To proceed with the auction process on the registered NFT, please follow the steps demonstrated in the Auction Demo (see Videos Demos section).
+
+![DeployedContracts](screenshot/deployedcontracts.PNG)
+
+### Load Keys In .env File
+
+1. Load Ganache WEB3_PROVIDER_URI.
+2. Copy STORE_OWNER_WALLET_ADDRESS from Ganache.
+3. Copy deployed InAppCoin_SMART_CONTRACT_ADDRESS from InAppCoin.sol.
+4. Copy deployed FILE_TOKEN_ADDRESS from file_registry.sol.
+5. Load PINATA_API_KEY and PINATA_SECRET_KEY.
+
+![EnvContents](screenshot/envcontents.PNG)
+
+### Streamlit dapp
 
 
-
+1. Open command line interface terminal
+2. For MINT Marketplace dapp, navigate to location, then input command `streamlit run full_app.py`
 
 ## Outcome and Summary
-
+---
+### Running dApp
+[![StreamlitApp](https://img.youtube.com/vi/oqq1MAU4CQg/0.jpg)](https://www.youtube.com/watch?v=oqq1MAU4CQg)
+>
+### IPFS/Pinata
+[![StreamlitApp](https://img.youtube.com/vi/RsCRE-JZNAk/0.jpg)](https://www.youtube.com/watch?v=RsCRE-JZNAk)
+>
 ### NFT Minting
 ![Minting](screenshot/nft_minting.PNG)
-
+>
 ### NFT Transferring with ICO
 ![Transfer](screenshot/nft_transfer.PNG)
 
+MetaMask verification of ERC20 "MINT" Token</br>
+[![StreamlitApp](https://img.youtube.com/vi/ovsfEm_JYNc/0.jpg)](https://www.youtube.com/watch?v=ovsfEm_JYNc)
+>
 
 ### Optimization and Debugging Opportunities
 
@@ -108,7 +121,7 @@ Created by Yu Takahashi, Silvano Ross, Saidee Padilla and Tracie Stipp while in 
 >
 > email: yu.taka.070202@gmail.com |
 > [GitHub](https://github.com/yutakadayo) |
-> [LinkedIn]()
+> [LinkedIn](https://www.linkedin.com/in/yu-takahashi-068472235/)
 >
 > email: silvanoross3@gmail.com |
 > [GitHub](https://github.com/silvanoross) |
