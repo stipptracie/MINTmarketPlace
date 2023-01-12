@@ -103,10 +103,12 @@ MetaMask verification of ERC20 "MINT" Token</br>
 [![StreamlitApp](https://img.youtube.com/vi/ovsfEm_JYNc/0.jpg)](https://www.youtube.com/watch?v=ovsfEm_JYNc)
 >
 
-### Optimization and Debugging Opportunities
+### Optimization Opportunities: Next Steps
+---
+Optimization of our dApp would include the following two components:
 
-
-___
+1. Visual Tokens - Show visual/artwork with description for token for buyer rather than just token number and metadata
+2. Auction - Implement auction, tracking bids over time, with transfer when transaction is approved
 
 
 ## Contributors
