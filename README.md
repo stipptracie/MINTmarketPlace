@@ -84,6 +84,7 @@ To run the application, clone the code from this GitHub repository.
 
 ### Streamlit dapp
 
+
 1. Open command line interface terminal
 2. For MINT Marketplace dapp, navigate to location, then input command `streamlit run full_app.py`
 
