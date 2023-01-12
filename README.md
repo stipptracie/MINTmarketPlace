@@ -70,7 +70,7 @@ To run the application, clone the code from this GitHub repository.
 5. Deploy the `file_registry.sol` and check the deployed contract to ensure it is there. Copy the address to the .env file.
 6. To proceed with the auction process on the registered NFT, please follow the steps demonstrated in the Auction Demo (see Videos Demos section).
 
-![DeployedContracts](screenshot/deployedcontracts.PNG)
+![DeployedContracts](screenshot/deployedcontracts.png)
 
 ### Load Keys In .env File
 
@@ -80,7 +80,7 @@ To run the application, clone the code from this GitHub repository.
 4. Copy deployed FILE_TOKEN_ADDRESS from file_registry.sol.
 5. Load PINATA_API_KEY and PINATA_SECRET_KEY.
 
-![EnvContents](screenshot/envcontents.PNG)
+![EnvContents](screenshot/ENVfilecontents.png)
 
 ### Streamlit dapp
 
